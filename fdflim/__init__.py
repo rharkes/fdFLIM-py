@@ -62,7 +62,7 @@ def tau2mod(tau, f):
     :param f: frequency(Hz)
     :return: de-modulation
     """
-    mod = 1 / np.sqrt(1 / ((getomega(f) * tau) ** 2 + 1))
+    mod = np.sqrt(1 / ((getomega(f) * tau) ** 2 + 1))
     return mod
 
 
@@ -73,7 +73,7 @@ def tau2phi(tau, f):
     :param f: frequency(Hz)
     :return: phase-shift
     """
-    phi = np.atan(getomega(f) * tau)
+    phi = np.arctan(getomega(f) * tau)
     return phi
 
 
@@ -88,8 +88,8 @@ def getsystemphimod(stack, tau, f, axis=2):
     """
     ref_mod = tau2mod(tau, f)  # expected modulation
     ref_phi = tau2phi(tau, f)  # expected phase shift
-    phi, mod = phimoddc(stack, f, axis=axis)  # measured phi and mod
-    systemphi = phi - ref_phi
+    phi, mod, dc = phimoddc(stack, axis=axis)  # measured phi and mod
+    systemphi = ref_phi - phi
     systemmod = mod / ref_mod
     return systemphi, systemmod
 
@@ -118,23 +118,30 @@ class Sample:
             self.f = f
         if not self.f == reference.f:
             print('frequency of sample not equal to frequency of reference')
-        phi, mod = phimoddc(stack, f, axis=axis)
-        self.phi = phi + reference.systemphi
-        self.mod = mod / reference.systemphi
+        self.s = stack.shape
+        phi, mod, dc = phimoddc(stack, axis=axis)
+        systemphi = reference.systemphi
+        systemmod = reference.systemmod
+        for i in range(2, len(phi.shape)):
+            systemphi = systemphi[:, :, np.newaxis]
+            systemmod = systemmod[:, :, np.newaxis]
+        self.phi = phi + systemphi
+        self.mod = mod / systemmod
+        self.dc = dc
 
     def getlifetimephase(self):
         """
         Get sample lifetime from phase
         :return: lifetime(s)
         """
-        return phi2tau(self.phi)
+        return phi2tau(self.phi, self.f)
 
     def getlifetimemod(self):
         """
         Get sample lifetime from modulation
         :return: lifetime(s)
         """
-        return mod2tau(self.mod)
+        return mod2tau(self.mod, self.f)
 
     def getphasorplotcoords(self):
         """
