@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fdflim"
+version = "0.5.1"
+description = "Several functions for working with frequency domain FLIM data."
+readme = "README.md"
+authors = [{ name = "Rolf Harkes", email = "r.harkes@nki.nl" }]
+classifiers = [
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+]
+keywords = ["fluorescence", "lifetime", "imaging", "FLIM", "Frequency"]
+dependencies = [
+    "numpy",
+]
+requires-python = ">=3.9"
+[project.optional-dependencies]
+dev = ["black", "bumpver", "pytest", "mypy", "setuptools", "build", "twine"]
+
+[project.urls]
+Homepage = "https://github.com/rharkes/flifile"
+
+[tool.bumpver]
+current_version = "0.5.1"
+version_pattern = "MAJOR.MINOR.PATCH"
+commit_message = "bump version {old_version} -> {new_version}"
+commit = true
+tag = true
+push = false
+
+[tool.bumpver.file_patterns]
+"pyproject.toml" = [
+    'current_version = "{version}"',
+    'version = "{version}"',
+]
+"fdflim/version.py" = [
+    "{version}"
+]
+
+[tool.black]
+line-length = 88
+target-version = ['py39', 'py310', 'py311']
+
+[tool.pytest.ini_options]
+pythonpath = [
+  "."
+]
+
+[tool.mypy]
+python_version = '3.11'
+packages = "fdflim"
+strict = true
